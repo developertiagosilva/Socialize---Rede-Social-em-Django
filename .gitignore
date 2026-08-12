@@ -1,0 +1,33 @@
+```gitignore
+# Ambientes Virtuais
+.venv/
+venv/
+ENV/
+env/
+
+# Python Bytecode e Cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Banco de Dados SQLite Local
+*.sqlite3
+*.db
+
+# Arquivos de Upload do Usuário (Media local)
+media/avatars/*
+!media/avatars/.gitkeep
+
+# IDEs e Editores
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Arquivos do Sistema Operacional
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
