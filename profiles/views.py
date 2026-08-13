@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import User  # <-- ADICIONE ESTA LINHA!
+from django.contrib.auth.models import User
 from django.contrib import messages
 from .forms import RegisterForm, ProfileUpdateForm
 from .models import Profile
@@ -18,9 +18,9 @@ def register_view(request):
         form = RegisterForm(request.POST)
         if form.is_valid():
             user = form.save(commit=False)
-            user.set_password(form.cleaned_data['password']) # Criptografa a senha
-            user.save() # O nosso Signal criará o Profile automaticamente aqui
-            login(request, user) # Faz o login automático pós-cadastro
+            user.set_password(form.cleaned_data['password'])
+            user.save()
+            login(request, user)
             messages.success(request, "Conta criada com sucesso! Bem-vindo ao Socialize.")
             return redirect('home')
     else:
@@ -36,15 +36,15 @@ def home_view(request):
         form = PostForm(request.POST)
         if form.is_valid():
             post = form.save(commit=False)
-            post.author = request.user.profile  # Associa o post ao perfil logado
+            post.author = request.user.profile
             post.save()
             messages.success(request, "Seu post foi publicado com sucesso!")
             return redirect('home')
     else:
         form = PostForm()
 
-    # Busca todos os posts ordenados do mais recente para o mais antigo
-    posts = Post.objects.all()
+    # Traz os posts e já carrega os relacionamentos de Profile e User
+    posts = Post.objects.select_related('author', 'author__user').all().order_by('-created_at')
 
     context = {
         'form': form,
@@ -58,11 +58,12 @@ def delete_account_view(request):
     """Exclusão da conta do usuário"""
     if request.method == 'POST':
         user = request.user
-        user.delete() # Exclui o User e, por efeito CASCADE, o Profile e seus posts
+        user.delete()
         messages.info(request, "Sua conta foi excluída com sucesso.")
         return redirect('login')
 
     return render(request, 'profiles/delete_confirm.html')
+
 
 @login_required
 def follow_toggle_view(request, profile_id):
@@ -70,7 +71,6 @@ def follow_toggle_view(request, profile_id):
     target_profile = get_object_or_404(Profile, id=profile_id)
     my_profile = request.user.profile
 
-    # Impede que o usuário siga a si mesmo
     if my_profile != target_profile:
         if target_profile in my_profile.following.all():
             my_profile.following.remove(target_profile)
@@ -79,9 +79,10 @@ def follow_toggle_view(request, profile_id):
             my_profile.following.add(target_profile)
             messages.success(request, f"Agora você está seguindo {target_profile.user.username}!")
 
-    return redirect('home')
-
-
+    next_url = request.META.get('HTTP_REFERER')
+    if next_url:
+        return redirect(next_url)
+    return redirect('profile_detail', username=target_profile.user.username)
 
 
 @login_required
@@ -89,7 +90,7 @@ def profile_detail_view(request, username):
     """Exibe a página de perfil de um usuário específico"""
     profile_user = get_object_or_404(User, username=username)
     profile = profile_user.profile
-    posts = profile.posts.all()  # Posts criados apenas por esse perfil
+    posts = profile.posts.all().order_by('-created_at')
 
     context = {
         'profile': profile,
@@ -104,7 +105,6 @@ def edit_profile_view(request):
     profile = request.user.profile
 
     if request.method == 'POST':
-        # Importante: request.FILES é obrigatório para processar upload de arquivos (avatar)
         form = ProfileUpdateForm(request.POST, request.FILES, instance=profile)
         if form.is_valid():
             form.save()
