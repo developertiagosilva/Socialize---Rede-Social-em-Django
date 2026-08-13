@@ -99,12 +99,13 @@ USE_TZ = True
 # Configurações de Arquivos Estáticos (CSS, JS, Imagens do tema)
 STATIC_URL = "/static/"
 
-
 if (BASE_DIR / "static").exists():
     STATICFILES_DIRS = [BASE_DIR / "static"]
 
 STATIC_ROOT = BASE_DIR / "staticfiles"
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
+# Storage flexível para evitar Erro 500 caso algum estático esteja ausente
+STATICFILES_STORAGE = "whitenoise.storage.StaticFilesStorage"
 
 
 # Configuração do Cloudinary para Armazenamento de Fotos (Media)
@@ -118,17 +119,17 @@ CLOUDINARY_STORAGE = {
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-# Define o storage do Cloudinary para upload de mídias
+# Define o storage do Cloudinary para upload de mídias quando em produção
 if os.getenv('CLOUDINARY_CLOUD_NAME'):
     DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
     
-    # Suporte adicional para versões do Django 4.2+ / 5+
+    # Suporte para Django 4.2+ / 5+ com WhiteNoise tolerante a falhas
     STORAGES = {
         "default": {
             "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
         },
         "staticfiles": {
-            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+            "BACKEND": "whitenoise.storage.StaticFilesStorage",
         },
     }
 
