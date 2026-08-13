@@ -98,9 +98,11 @@ USE_TZ = True
 
 # Configurações de Arquivos Estáticos (CSS, JS, Imagens do tema)
 STATIC_URL = "/static/"
-STATICFILES_DIRS = [
-    BASE_DIR / "static"
-]
+
+
+if (BASE_DIR / "static").exists():
+    STATICFILES_DIRS = [BASE_DIR / "static"]
+
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
@@ -135,4 +137,5 @@ LOGOUT_REDIRECT_URL = 'login'
 
 CSRF_TRUSTED_ORIGINS = [
     'https://socialize-f6zy.onrender.com',
+    'http://socialize-f6zy.onrender.com',
 ]
