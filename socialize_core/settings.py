@@ -104,35 +104,35 @@ if (BASE_DIR / "static").exists():
 
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
-# Storage flexível para evitar Erro 500 caso algum estático esteja ausente
-STATICFILES_STORAGE = "whitenoise.storage.StaticFilesStorage"
+# MEDIA_URL e MEDIA_ROOT
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 
-
-# Configuração do Cloudinary para Armazenamento de Fotos (Media)
+# Configuração do Cloudinary
 CLOUDINARY_STORAGE = {
     'CLOUD_NAME': os.getenv('CLOUDINARY_CLOUD_NAME', ''),
     'API_KEY': os.getenv('CLOUDINARY_API_KEY', ''),
     'API_SECRET': os.getenv('CLOUDINARY_API_SECRET', '')
 }
 
-# MEDIA_URL deve existir em AMBOS os ambientes
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+# Compatibilidade antiga
+STATICFILES_STORAGE = "whitenoise.storage.StaticFilesStorage"
 
-# Define o storage do Cloudinary para upload de mídias quando em produção
+# Configuração Global de Storages (Django 4.2 / 5.x / 6.x)
 if os.getenv('CLOUDINARY_CLOUD_NAME'):
     DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
-    
-    # Suporte para Django 4.2+ / 5+ com WhiteNoise tolerante a falhas
-    STORAGES = {
-        "default": {
-            "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
-        },
-        "staticfiles": {
-            "BACKEND": "whitenoise.storage.StaticFilesStorage",
-        },
-    }
+    MEDIA_BACKEND = "cloudinary_storage.storage.MediaCloudinaryStorage"
+else:
+    MEDIA_BACKEND = "django.core.files.storage.FileSystemStorage"
 
+STORAGES = {
+    "default": {
+        "BACKEND": MEDIA_BACKEND,
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.StaticFilesStorage",
+    },
+}
 
 # Email
 MAILERS = {
