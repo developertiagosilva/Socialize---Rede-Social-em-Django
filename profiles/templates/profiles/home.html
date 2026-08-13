@@ -1,165 +1,122 @@
 {% extends 'profiles/base.html' %}
+{% load static %}
 
 {% block title %}Feed - Socialize{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-8">
+<div class="container my-4">
+    <div class="row g-4">
+        
+        <!-- COLUNA DA ESQUERDA: Card do Perfil Logado -->
+        <div class="col-lg-3 d-none d-lg-block">
+            <div class="card border-0 shadow-sm rounded-4 text-center p-3 mb-3">
+                <div class="card-body p-2">
+                    {% if request.user.profile.avatar %}
+                        <img src="{{ request.user.profile.avatar.url }}" alt="{{ request.user.username }}" class="rounded-circle mb-3 shadow-sm" style="width: 80px; height: 80px; object-fit: cover;">
+                    {% else %}
+                        <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center fw-bold fs-2 mb-3 shadow-sm" style="width: 80px; height: 80px;">
+                            {{ request.user.username|first|upper }}
+                        </div>
+                    {% endif %}
+                    
+                    <h5 class="fw-bold mb-0">{{ request.user.username }}</h5>
+                    <p class="text-muted small">@{{ request.user.username }}</p>
 
-        <!-- Card de Criar Publicação -->
-        <div class="card shadow-sm border-0 mb-4">
-            <div class="card-body p-4">
-                <h5 class="card-title text-primary mb-3">Criar Publicação</h5>
-                
-                <form method="post" action="{% url 'home' %}">
-                    {% csrf_token %}
-                    <div class="mb-3">
-                        {{ form.content }}
+                    <div class="d-flex justify-content-around my-3 py-2 border-top border-bottom">
+                        <div>
+                            <strong class="d-block fs-6">{{ request.user.profile.posts.count }}</strong>
+                            <small class="text-muted" style="font-size: 12px;">Posts</small>
+                        </div>
+                        <div>
+                            <strong class="d-block fs-6">{{ request.user.profile.followers.count }}</strong>
+                            <small class="text-muted" style="font-size: 12px;">Seguidores</small>
+                        </div>
                     </div>
-                    <div class="d-flex justify-content-end">
-                        <button type="submit" class="btn btn-primary fw-bold">Publicar</button>
-                    </div>
-                </form>
+
+                    <a href="{% url 'profile_detail' request.user.username %}" class="btn btn-outline-primary btn-sm w-100 rounded-pill fw-semibold">
+                        Ver Meu Perfil
+                    </a>
+                </div>
             </div>
         </div>
 
-        <!-- Feed de Notícias -->
-        <h4 class="mb-3 text-secondary">Feed de Notícias</h4>
-
-        {% for post in posts %}
-            <div class="card shadow-sm border-0 mb-4">
+        <!-- COLUNA CENTRAL: Feed de Notícias e Criação -->
+        <div class="col-lg-6 col-md-12">
+            
+            <!-- Card de Criar Publicação -->
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
                 <div class="card-body p-4">
-                    
-                    <!-- Cabeçalho do Post (Avatar/Inicial + Nome + Botão Seguir) -->
-                    <div class="d-flex align-items-center justify-content-between mb-3">
-                        <div class="d-flex align-items-center">
-                            <!-- Renderiza Avatar se existir, se não renderediza a inicial -->
-                            <a href="{% url 'profile_detail' post.author.user.username %}" class="text-decoration-none">
-                                {% if post.author.avatar %}
-                                    <img src="{{ post.author.avatar.url }}" alt="Foto de {{ post.author.user.username }}" class="rounded-circle me-3" style="width: 40px; height: 40px; object-fit: cover;">
-                                {% else %}
-                                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold me-3" style="width: 40px; height: 40px;">
-                                        {{ post.author.user.username|first|upper }}
-                                    </div>
-                                {% endif %}
-                            </a>
-
-                            <div>
-                                <h6 class="mb-0 fw-bold">
-                                    <a href="{% url 'profile_detail' post.author.user.username %}" class="text-dark text-decoration-none">
-                                        {{ post.author.user.username }}
-                                    </a>
-                                </h6>
-                                <small class="text-muted">{{ post.created_at|date:"d/m/Y - H:i" }}</small>
-                            </div>
-                        </div>
-
-                        <!-- Botão Seguir / Deixar de Seguir -->
-                        {% if request.user.profile != post.author %}
-                            <a href="{% url 'follow_toggle' post.author.id %}" class="btn btn-sm {% if post.author in request.user.profile.following.all %}btn-outline-secondary{% else %}btn-primary{% endif %}">
-                                {% if post.author in request.user.profile.following.all %}
-                                    Seguindo
-                                {% else %}
-                                    + Seguir
-                                {% endif %}
-                            </a>
-                        {% endif %}
-                    </div>
-                    
-                    <!-- Conteúdo do Post -->
-                    <p class="card-text fs-5 mb-3">{{ post.content }}</p>
-
-                    <!-- Ação: Curtir Post Principal -->
-                    <div class="d-flex align-items-center gap-3 mb-3">
-                        <a href="{% url 'like_post' post.id %}" class="btn btn-sm text-decoration-none p-0">
-                            {% if request.user.profile in post.likes.all %}
-                                ❤️ <span class="fw-bold text-danger">{{ post.total_likes }} Curtidas</span>
-                            {% else %}
-                                🤍 <span class="text-muted">{{ post.total_likes }} Curtidas</span>
-                            {% endif %}
-                        </a>
-                    </div>
-
-                    <hr class="text-muted">
-
-                    <!-- Formulário para Comentar -->
-                    <form method="post" action="{% url 'add_comment' post.id %}" class="mb-4">
+                    <h6 class="fw-bold mb-3 text-primary d-flex align-items-center gap-2">
+                        <i class="bi bi-pencil-square"></i> Criar Publicação
+                    </h6>
+                    <form method="post" action="{% url 'home' %}">
                         {% csrf_token %}
-                        <div class="input-group">
-                            <input type="text" name="content" class="form-control" placeholder="Escreva um comentário..." required>
-                            <button class="btn btn-outline-primary" type="submit">Comentar</button>
+                        <div class="mb-3">
+                            <textarea name="content" class="form-control border-0 bg-light rounded-3 p-3" rows="3" placeholder="No que você está pensando agora, {{ request.user.username }}?" style="resize: none;" required></textarea>
+                        </div>
+                        <div class="d-flex justify-content-end">
+                            <button type="submit" class="btn btn-primary rounded-pill px-4 fw-semibold shadow-sm">
+                                Publicar
+                            </button>
                         </div>
                     </form>
-
-                    <!-- Comentários -->
-                    <div class="comments-section ms-2">
-                        {% for comment in post.comments.all %}
-                            {% if not comment.parent %}
-                                <div class="p-2 mb-2 bg-light rounded border-start border-3 border-primary">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <strong>{{ comment.author.user.username }}</strong>
-                                        <small class="text-muted">{{ comment.created_at|date:"H:i" }}</small>
-                                    </div>
-                                    <p class="mb-1 text-secondary">{{ comment.content }}</p>
-
-                                    <!-- Curtir Comentário -->
-                                    <div class="d-flex align-items-center gap-2 mb-2">
-                                        <a href="{% url 'like_comment' comment.id %}" class="btn btn-sm btn-link text-decoration-none p-0">
-                                            {% if request.user.profile in comment.likes.all %}
-                                                ❤️ <span class="fw-bold text-danger">{{ comment.total_likes }}</span>
-                                            {% else %}
-                                                🤍 <span>{{ comment.total_likes }}</span>
-                                            {% endif %}
-                                        </a>
-
-                                        <button class="btn btn-sm btn-link text-decoration-none p-0 text-muted" type="button" data-bs-toggle="collapse" data-bs-target="#reply-form-{{ comment.id }}">
-                                            Responder
-                                        </button>
-                                    </div>
-
-                                    <!-- Form Resposta -->
-                                    <div class="collapse mt-2" id="reply-form-{{ comment.id }}">
-                                        <form method="post" action="{% url 'add_comment' post.id %}">
-                                            {% csrf_token %}
-                                            <input type="hidden" name="parent_id" value="{{ comment.id }}">
-                                            <div class="input-group input-group-sm">
-                                                <input type="text" name="content" class="form-control" placeholder="Responder a {{ comment.author.user.username }}..." required>
-                                                <button class="btn btn-primary" type="submit">Enviar</button>
-                                            </div>
-                                        </form>
-                                    </div>
-
-                                    <!-- Respostas ao Comentário -->
-                                    {% for reply in comment.replies.all %}
-                                        <div class="ms-4 mt-2 p-2 bg-white rounded border-start border-2 border-secondary">
-                                            <div class="d-flex justify-content-between align-items-center">
-                                                <strong class="small">{{ reply.author.user.username }}</strong>
-                                                <small class="text-muted" style="font-size: 0.75rem;">{{ reply.created_at|date:"H:i" }}</small>
-                                            </div>
-                                            <p class="mb-1 small text-dark">{{ reply.content }}</p>
-                                            
-                                            <a href="{% url 'like_comment' reply.id %}" class="btn btn-sm btn-link text-decoration-none p-0">
-                                                {% if request.user.profile in reply.likes.all %}
-                                                    ❤️ <span class="fw-bold text-danger small">{{ reply.total_likes }}</span>
-                                                {% else %}
-                                                    🤍 <span class="small">{{ reply.total_likes }}</span>
-                                                {% endif %}
-                                            </a>
-                                        </div>
-                                    {% endfor %}
-
-                                </div>
-                            {% endif %}
-                        {% endfor %}
-                    </div>
-
                 </div>
             </div>
-        {% empty %}
-            <div class="alert alert-light text-center border">
-                Nenhuma publicação ainda. Seja o primeiro a postar algo! 🚀
-            </div>
-        {% endfor %}
+
+            <!-- Feed de Notícias -->
+            <h5 class="fw-bold mb-3 text-secondary">Feed de Notícias</h5>
+
+            {% for post in posts %}
+                <div class="card border-0 shadow-sm rounded-4 mb-3">
+                    <div class="card-body p-4">
+                        
+                        <!-- Cabeçalho do Post -->
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div class="d-flex align-items-center gap-3">
+                                <a href="{% url 'profile_detail' post.author.username %}" class="text-decoration-none">
+                                    {% if post.author.profile.avatar %}
+                                        <img src="{{ post.author.profile.avatar.url }}" alt="{{ post.author.username }}" class="rounded-circle shadow-sm" style="width: 45px; height: 45px; object-fit: cover;">
+                                    {% else %}
+                                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold fs-5 shadow-sm" style="width: 45px; height: 45px;">
+                                            {{ post.author.username|first|upper }}
+                                        </div>
+                                    {% endif %}
+                                </a>
+                                <div>
+                                    <a href="{% url 'profile_detail' post.author.username %}" class="fw-bold text-dark text-decoration-none d-block">
+                                        {{ post.author.username }}
+                                    </a>
+                                    <small class="text-muted" style="font-size: 12px;">{{ post.created_at|date:"d/m/Y - H:i" }}</small>
+                                </div>
+                            </div>
+
+                            {% if request.user != post.author %}
+                                <a href="{% url 'follow_toggle' post.author.profile.id %}" class="btn btn-sm rounded-pill px-3 {% if post.author.profile in request.user.profile.following.all %}btn-outline-secondary{% else %}btn-primary{% endif %} fw-semibold">
+                                    {% if post.author.profile in request.user.profile.following.all %}
+                                        Seguindo
+                                    {% else %}
+                                        + Seguir
+                                    {% endif %}
+                                </a>
+                            {% endif %}
+                        </div>
+
+                        <!-- Conteúdo do Post -->
+                        <p class="card-text fs-6 text-dark my-2" style="white-space: pre-line;">
+                            {{ post.content }}
+                        </p>
+
+                    </div>
+                </div>
+            {% empty %}
+                <div class="card border-0 shadow-sm rounded-4 text-center p-5">
+                    <div class="card-body">
+                        <p class="text-muted fs-5 mb-0">Nenhuma publicação por aqui ainda. Seja o primeiro a postar!</p>
+                    </div>
+                </div>
+            {% endfor %}
+
+        </div>
 
     </div>
 </div>
