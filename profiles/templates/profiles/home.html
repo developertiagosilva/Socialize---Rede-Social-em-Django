@@ -71,37 +71,39 @@
                     <div class="card-body p-4">
                         
                         <!-- Cabeçalho do Post -->
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <div class="d-flex align-items-center gap-3">
-                                <a href="{% url 'profile_detail' post.author.username %}" class="text-decoration-none">
-                                    {% if post.author.profile.avatar %}
-                                        <img src="{{ post.author.profile.avatar.url }}" alt="{{ post.author.username }}" class="rounded-circle shadow-sm" style="width: 45px; height: 45px; object-fit: cover;">
-                                    {% else %}
-                                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold fs-5 shadow-sm" style="width: 45px; height: 45px;">
-                                            {{ post.author.username|first|upper }}
-                                        </div>
-                                    {% endif %}
-                                </a>
-                                <div>
-                                    <a href="{% url 'profile_detail' post.author.username %}" class="fw-bold text-dark text-decoration-none d-block">
-                                        {{ post.author.username }}
-                                    </a>
-                                    <small class="text-muted" style="font-size: 12px;">{{ post.created_at|date:"d/m/Y - H:i" }}</small>
-                                </div>
-                            </div>
-
-                            {% if request.user != post.author %}
-                                <a href="{% url 'follow_toggle' post.author.profile.id %}" class="btn btn-sm rounded-pill px-3 {% if post.author.profile in request.user.profile.following.all %}btn-outline-secondary{% else %}btn-primary{% endif %} fw-semibold">
-                                    {% if post.author.profile in request.user.profile.following.all %}
-                                        Seguindo
-                                    {% else %}
-                                        + Seguir
-                                    {% endif %}
-                                </a>
-                            {% endif %}
-                        </div>
-
-                        <!-- Conteúdo do Post -->
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="d-flex align-items-center gap-3">
+        {% if post.author and post.author.username %}
+            <a href="{% url 'profile_detail' post.author.username %}" class="text-decoration-none">
+                {% if post.author.profile and post.author.profile.avatar %}
+                    <img src="{{ post.author.profile.avatar.url }}" alt="{{ post.author.username }}" class="rounded-circle shadow-sm" style="width: 45px; height: 45px; object-fit: cover;" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div class="bg-primary text-white rounded-circle align-items-center justify-content-center fw-bold fs-5 shadow-sm" style="width: 45px; height: 45px; display: none;">
+                        {{ post.author.username|first|upper }}
+                    </div>
+                {% else %}
+                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold fs-5 shadow-sm" style="width: 45px; height: 45px;">
+                        {{ post.author.username|first|upper }}
+                    </div>
+                {% endif %}
+            </a>
+            <div>
+                <a href="{% url 'profile_detail' post.author.username %}" class="fw-bold text-dark text-decoration-none d-block">
+                    {{ post.author.username }}
+                </a>
+                <small class="text-muted">{{ post.created_at|date:"d/m/Y - H:i" }}</small>
+            </div>
+        {% else %}
+            <!-- Fallback para posts sem autor válido -->
+            <div class="bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold fs-5 shadow-sm" style="width: 45px; height: 45px;">
+                ?
+            </div>
+            <div>
+                <span class="fw-bold text-dark d-block">Usuário Anônimo</span>
+                <small class="text-muted">{{ post.created_at|date:"d/m/Y - H:i" }}</small>
+            </div>
+        {% endif %}
+    </div>
+</div>
                         <p class="card-text fs-6 text-dark my-2" style="white-space: pre-line;">
                             {{ post.content }}
                         </p>
