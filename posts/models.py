@@ -1,15 +1,10 @@
 from django.db import models
 from profiles.models import Profile
-from profiles.models import Profile
-
 
 class Post(models.Model):
     author = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='posts')
     content = models.TextField(max_length=1000, verbose_name="Conteúdo do Post")
-    
-    # --- MUDANÇA AQUI: De CloudinaryField para ImageField ---
     image = models.ImageField(upload_to='posts_images/', blank=True, null=True)
-    
     created_at = models.DateTimeField(auto_now_add=True)
     update_at = models.DateTimeField(auto_now=True)
 
@@ -25,17 +20,13 @@ class Post(models.Model):
     def total_likes(self):
         return self.likes.count()
 
-# (Mantenha o model Comment igual abaixo...)
-
 
 class Comment(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments')
     author = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='comments')
     content = models.TextField(max_length=500, verbose_name="Comentário")
     created_at = models.DateTimeField(auto_now_add=True)
-
     parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='replies')
-
     likes = models.ManyToManyField(Profile, related_name='liked_comments', blank=True)
 
     class Meta:
