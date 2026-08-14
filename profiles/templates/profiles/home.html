@@ -109,12 +109,22 @@
                                     </div>
                                 {% endif %}
                             </div>
+
+                            <!-- Botão de Exclusão (Visível apenas para o autor do post) -->
+                            {% if post.author and post.author.user == request.user %}
+                                <form action="{% url 'excluir_post' post.pk %}" method="POST" class="ms-auto">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-3" style="font-size: 12px;" onclick="return confirm('Deseja realmente excluir esta publicação?');">
+                                        🗑️ Excluir
+                                    </button>
+                                </form>
+                            {% endif %}
                         </div>
 
-                        <!-- Exibição da Imagem do Post (Se houver) -->
+                        <!-- Exibição da Imagem do Post (Responsiva sem cortar) -->
                         {% if post.image %}
-                            <div class="mb-3">
-                                <img src="{{ post.image.url }}" alt="Imagem da publicação" class="img-fluid rounded-4 shadow-sm w-100" style="max-height: 450px; object-fit: cover;">
+                            <div class="mb-3 text-center bg-light rounded-4 overflow-hidden p-2">
+                                <img src="{{ post.image.url }}" alt="Imagem da publicação" class="img-fluid rounded-4 shadow-sm w-100" style="max-height: 500px; object-fit: contain;">
                             </div>
                         {% endif %}
 

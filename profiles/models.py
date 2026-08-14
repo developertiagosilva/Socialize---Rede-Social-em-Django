@@ -10,8 +10,7 @@ class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
 
     bio = models.TextField(max_length=300, blank=True, verbose_name="Biografia")
-    avatar = models.ImageField(upload_to='avatars/', blank=True, null="True", verbose_name="Foto de Perfil")
-
+    avatar = models.ImageField(upload_to='avatars/', blank=True, null=True, verbose_name="Foto de Perfil")
     following = models.ManyToManyField('self', symmetrical=False, related_name='followers', blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)

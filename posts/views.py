@@ -64,3 +64,13 @@ def like_post_view(request, post_id):
         'liked': liked,
         'likes_count': post.likes.count()
     })
+
+@login_required
+def excluir_post(request, pk):
+    post = get_object_or_404(Post, pk=pk)
+    
+    # Verifica se o usuário logado é o autor do post
+    if post.author.user == request.user:
+        post.delete()
+        
+    return redirect('home')
