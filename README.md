@@ -5,6 +5,7 @@ O **Socialize** é uma aplicação web de rede social desenvolvida em Python e D
 ---
 <img src="perfi_usuario.png" width="200" alt="Logo">
 <img src="feed.png" width="200" alt="Logo">
+![Logo do projeto](feed.png)
 
 ## 🚀 Funcionalidades
 
