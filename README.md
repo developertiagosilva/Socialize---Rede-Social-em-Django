@@ -3,6 +3,8 @@
 O **Socialize** é uma aplicação web de rede social desenvolvida em Python e Django. O projeto foi projetado com foco em boas práticas de arquitetura, modularização de apps, relacionamentos de banco de dados, autenticação de usuários, versionamento profissional e integração com serviços em nuvem.
 
 ---
+<img src="perfi_usuario.png" width="200" alt="Logo">
+<img src="feed.png" width="200" alt="Logo">
 
 ## 🚀 Funcionalidades
 
