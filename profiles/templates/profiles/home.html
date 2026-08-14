@@ -43,17 +43,24 @@
         <!-- COLUNA CENTRAL: Feed de Notícias e Criação -->
         <div class="col-lg-6 col-md-12">
             
-            <!-- Card de Criar Publicação -->
+            <!-- Card de Criar Publicação (Com suporte a imagem) -->
             <div class="card border-0 shadow-sm rounded-4 mb-4">
                 <div class="card-body p-4">
                     <h6 class="fw-bold mb-3 text-primary d-flex align-items-center gap-2">
                         <i class="bi bi-pencil-square"></i> Criar Publicação
                     </h6>
-                    <form method="post" action="{% url 'home' %}">
+                    <form method="post" action="{% url 'home' %}" enctype="multipart/form-data">
                         {% csrf_token %}
                         <div class="mb-3">
                             <textarea name="content" class="form-control border-0 bg-light rounded-3 p-3" rows="3" placeholder="No que você está pensando agora, {{ request.user.username }}?" style="resize: none;" required></textarea>
                         </div>
+                        
+                        <!-- Campo de Imagem do Post -->
+                        <div class="mb-3">
+                            <label for="id_image" class="form-label text-muted small fw-semibold">Adicionar Imagem (Opcional)</label>
+                            <input type="file" name="image" id="id_image" class="form-control form-control-sm border-0 bg-light rounded-3">
+                        </div>
+
                         <div class="d-flex justify-content-end">
                             <button type="submit" class="btn btn-primary rounded-pill px-4 fw-semibold shadow-sm">
                                 Publicar
@@ -70,42 +77,61 @@
                 <div class="card border-0 shadow-sm rounded-4 mb-3">
                     <div class="card-body p-4">
                         
-<!-- Cabeçalho do Post no home.html -->
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <div class="d-flex align-items-center gap-3">
-        {% if post.author and post.author.user %}
-            <a href="{% url 'profile_detail' post.author.user.username %}" class="text-decoration-none">
-                {% if post.author.avatar %}
-                    <img src="{{ post.author.avatar.url }}" alt="{{ post.author.user.username }}" class="rounded-circle shadow-sm" style="width: 45px; height: 45px; object-fit: cover;" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                    <div class="bg-primary text-white rounded-circle align-items-center justify-content-center fw-bold fs-5 shadow-sm" style="width: 45px; height: 45px; display: none;">
-                        {{ post.author.user.username|first|upper }}
-                    </div>
-                {% else %}
-                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold fs-5 shadow-sm" style="width: 45px; height: 45px;">
-                        {{ post.author.user.username|first|upper }}
-                    </div>
-                {% endif %}
-            </a>
-            <div>
-                <a href="{% url 'profile_detail' post.author.user.username %}" class="fw-bold text-dark text-decoration-none d-block">
-                    {{ post.author.user.username }}
-                </a>
-                <small class="text-muted">{{ post.created_at|date:"d/m/Y - H:i" }}</small>
-            </div>
-        {% else %}
-            <div class="bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold fs-5 shadow-sm" style="width: 45px; height: 45px;">
-                ?
-            </div>
-            <div>
-                <span class="fw-bold text-dark d-block">Usuário Anônimo</span>
-                <small class="text-muted">{{ post.created_at|date:"d/m/Y - H:i" }}</small>
-            </div>
-        {% endif %}
-    </div>
-</div>
+                        <!-- Cabeçalho do Post -->
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div class="d-flex align-items-center gap-3">
+                                {% if post.author and post.author.user %}
+                                    <a href="{% url 'profile_detail' post.author.user.username %}" class="text-decoration-none">
+                                        {% if post.author.avatar %}
+                                            <img src="{{ post.author.avatar.url }}" alt="{{ post.author.user.username }}" class="rounded-circle shadow-sm" style="width: 45px; height: 45px; object-fit: cover;" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                            <div class="bg-primary text-white rounded-circle align-items-center justify-content-center fw-bold fs-5 shadow-sm" style="width: 45px; height: 45px; display: none;">
+                                                {{ post.author.user.username|first|upper }}
+                                            </div>
+                                        {% else %}
+                                            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold fs-5 shadow-sm" style="width: 45px; height: 45px;">
+                                                {{ post.author.user.username|first|upper }}
+                                            </div>
+                                        {% endif %}
+                                    </a>
+                                    <div>
+                                        <a href="{% url 'profile_detail' post.author.user.username %}" class="fw-bold text-dark text-decoration-none d-block">
+                                            {{ post.author.user.username }}
+                                        </a>
+                                        <small class="text-muted">{{ post.created_at|date:"d/m/Y - H:i" }}</small>
+                                    </div>
+                                {% else %}
+                                    <div class="bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold fs-5 shadow-sm" style="width: 45px; height: 45px;">
+                                        ?
+                                    </div>
+                                    <div>
+                                        <span class="fw-bold text-dark d-block">Usuário Anônimo</span>
+                                        <small class="text-muted">{{ post.created_at|date:"d/m/Y - H:i" }}</small>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Exibição da Imagem do Post (Se houver) -->
+                        {% if post.image %}
+                            <div class="mb-3">
+                                <img src="{{ post.image.url }}" alt="Imagem da publicação" class="img-fluid rounded-4 shadow-sm w-100" style="max-height: 450px; object-fit: cover;">
+                            </div>
+                        {% endif %}
+
+                        <!-- Conteúdo de Texto -->
                         <p class="card-text fs-6 text-dark my-2" style="white-space: pre-line;">
                             {{ post.content }}
                         </p>
+
+                        <!-- Botão de Curtir com AJAX -->
+                        <div class="d-flex align-items-center mt-3 pt-2 border-top">
+                            <button type="button" 
+                                    onclick="likePost('{{ post.id }}')" 
+                                    id="like-btn-{{ post.id }}" 
+                                    class="btn btn-sm {% if request.user.profile in post.likes.all %}btn-danger{% else %}btn-outline-danger{% endif %} rounded-pill px-3 d-flex align-items-center gap-1">
+                                ❤️ Curtir <span id="likes-count-{{ post.id }}" class="badge bg-white text-dark ms-1">{{ post.likes.count }}</span>
+                            </button>
+                        </div>
 
                     </div>
                 </div>
@@ -121,4 +147,34 @@
 
     </div>
 </div>
+
+<!-- Script colocado CORRETAMENTE dentro do bloco content -->
+<script>
+function likePost(postId) {
+    fetch(`/posts/like/${postId}/`, {
+        method: 'GET',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        const btn = document.getElementById(`like-btn-${postId}`);
+        const countSpan = document.getElementById(`likes-count-${postId}`);
+        
+        // Atualiza o número de curtidas
+        countSpan.textContent = data.likes_count;
+        
+        // Alterna a cor e o estilo do botão instantaneamente
+        if (data.liked) {
+            btn.classList.remove('btn-outline-danger');
+            btn.classList.add('btn-danger');
+        } else {
+            btn.classList.remove('btn-danger');
+            btn.classList.add('btn-outline-danger');
+        }
+    })
+    .catch(error => console.error('Erro:', error));
+}
+</script>
 {% endblock %}

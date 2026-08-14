@@ -12,10 +12,19 @@ class PostForm(forms.ModelForm):
         }),
         label=""
     )
+    
+    # Adicionando o campo de imagem de forma opcional
+    image = forms.ImageField(
+        required=False,
+        widget=forms.FileInput(attrs={
+            'class': 'form-control'
+        }),
+        label="Adicionar Imagem"
+    )
 
     class Meta:
         model = Post
-        fields = ['content']
+        fields = ['content', 'image']
 
 
 class CommentForm(forms.ModelForm):

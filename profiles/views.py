@@ -33,7 +33,8 @@ def register_view(request):
 def home_view(request):
     """Página Inicial interna (Feed + Criar Post)"""
     if request.method == 'POST':
-        form = PostForm(request.POST)
+        # ATENÇÃO: Adicionado request.FILES aqui para processar arquivos de imagem
+        form = PostForm(request.POST, request.FILES)
         if form.is_valid():
             post = form.save(commit=False)
             post.author = request.user.profile

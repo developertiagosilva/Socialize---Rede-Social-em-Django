@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .models import Post, Comment
 from .forms import CommentForm
+from django.http import JsonResponse
 
 @login_required
 def add_comment_view(request, post_id):
@@ -47,13 +48,19 @@ def like_comment_view(request, comment_id):
 
 @login_required
 def like_post_view(request, post_id):
-    """Curte ou descurte um post principal"""
+    """Curte ou descurte um post via AJAX (sem recarregar a página)"""
     post = get_object_or_404(Post, id=post_id)
     profile = request.user.profile
 
     if profile in post.likes.all():
         post.likes.remove(profile)
+        liked = False
     else:
         post.likes.add(profile)
+        liked = True
 
-    return redirect('home')
+    # Retorna os dados em JSON para o JavaScript atualizar a tela na mesma posição
+    return JsonResponse({
+        'liked': liked,
+        'likes_count': post.likes.count()
+    })

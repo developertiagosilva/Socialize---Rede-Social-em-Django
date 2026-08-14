@@ -6,6 +6,10 @@ import os
 from pathlib import Path
 import dj_database_url
 
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -118,21 +122,27 @@ CLOUDINARY_STORAGE = {
 # Compatibilidade antiga
 STATICFILES_STORAGE = "whitenoise.storage.StaticFilesStorage"
 
-# Configuração Global de Storages (Django 4.2 / 5.x / 6.x)
-if os.getenv('CLOUDINARY_CLOUD_NAME'):
-    DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
-    MEDIA_BACKEND = "cloudinary_storage.storage.MediaCloudinaryStorage"
+# Força o armazenamento local de arquivos se estiver em DEBUG
+if DEBUG:
+    DEFAULT_FILE_STORAGE = "django.core.files.storage.FileSystemStorage"
+    STORAGES = {
+        "default": {
+            "BACKEND": "django.core.files.storage.FileSystemStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "whitenoise.storage.StaticFilesStorage",
+        },
+    }
 else:
-    MEDIA_BACKEND = "django.core.files.storage.FileSystemStorage"
-
-STORAGES = {
-    "default": {
-        "BACKEND": MEDIA_BACKEND,
-    },
-    "staticfiles": {
-        "BACKEND": "whitenoise.storage.StaticFilesStorage",
-    },
-}
+    # Produção usa Cloudinary
+    STORAGES = {
+        "default": {
+            "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "whitenoise.storage.StaticFilesStorage",
+        },
+    }
 
 # Email
 MAILERS = {

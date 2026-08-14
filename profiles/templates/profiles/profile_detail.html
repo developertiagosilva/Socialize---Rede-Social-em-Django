@@ -64,7 +64,22 @@
             <div class="card shadow-sm border-0 mb-3">
                 <div class="card-body p-4">
                     <small class="text-muted d-block mb-2">{{ post.created_at|date:"d/m/Y - H:i" }}</small>
+                    
+                    <!-- Exibição da Imagem do Post (se houver) -->
+                    {% if post.image %}
+                        <div class="mb-3">
+                            <img src="{{ post.image.url }}" alt="Imagem do post" class="img-fluid rounded shadow-sm w-100" style="max-height: 400px; object-fit: cover;">
+                        </div>
+                    {% endif %}
+
                     <p class="card-text fs-5">{{ post.content }}</p>
+
+                    <!-- Botão de Curtir -->
+                    <div class="d-flex align-items-center mt-3">
+                        <a href="{% url 'like_post' post.id %}" class="btn btn-sm {% if request.user.profile in post.likes.all %}btn-danger{% else %}btn-outline-danger{% endif %} d-flex align-items-center gap-1">
+                            ❤️ Curtir <span class="badge bg-white text-dark ms-1">{{ post.likes.count }}</span>
+                        </a>
+                    </div>
                 </div>
             </div>
         {% empty %}
